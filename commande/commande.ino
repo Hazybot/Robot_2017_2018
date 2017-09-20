@@ -3,20 +3,10 @@
 
 #include <SoftwareSerial.h>
 
-#include <PinChangeInt.h>
-#include <PinChangeIntConfig.h>
-
-#include <MotorWheel.h>
 #include <Omni3WD.h>
 
-#include <SONAR.h>
+//#include <SONAR.h>
 #include <EEPROM.h>
-
-SONAR s11=SONAR(0x11);
-SONAR s12=SONAR(0x12);
-SONAR s13=SONAR(0x13);
-
-SoftwareSerial mySerial(9, 10)
 
 // Motors
 
@@ -88,29 +78,21 @@ void turnRight(){
   Omni.setCarRotateRight(200);
 }
 
+void translateLeft(){
+  Omni.setCarLeft(200);
+}
+
+void translateRight(){
+  Omni.setCarRight(200);
+}
+
 void stop(){
   Omni.setCarSlow2Stop(100);
-  Omni.delayMS(100);
+  //Omni.delayMS(100);
 }
 
-void sonar(){
 
-  char tampon[25];
-
-  //Récupération des données des capteurs
-    s11.trigger();
-    s12.trigger();
-    s13.trigger();
-    
-    delay(SONAR::duration);
-    
-    //Affichage
-    
-    //s11.showDat();
-  
-  sprintf(tampon, "#%x:%x:%x!", s11.getDist(), s12.getDist(), s13.getDist());
-    Serial.print(tampon);
-}
+SoftwareSerial mySerial(A0, A1);
 
 void setup() {
   TCCR1B=TCCR1B&0xf8|0x01;    // Pin9,Pin10 PWM 31250Hz
@@ -120,6 +102,7 @@ void setup() {
 
   //
   Omni.PIDEnable(0.46,0.2,0,10);
+
   Serial.begin(19200);
   /*wheel3.runPWM(50, HIGH);
   wheel2.runPWM(50, LOW);*/
@@ -129,8 +112,10 @@ void setup() {
 void loop() {
   
   if(mySerial.available()){
-
+    
     char c = mySerial.read();
+
+    Serial.println(c);
 
     switch(c){
       case 'f':
@@ -145,10 +130,19 @@ void loop() {
       case 'b':
         backward();
         break;
+      case 'a':
+        translateLeft();
+        break;
+      case 'c':
+        translateRight();
+        break;
       case 's':
         stop();
         break;
     }
+  }
+  else{
+    stop();
   }
   
   Omni.delayMS(100);

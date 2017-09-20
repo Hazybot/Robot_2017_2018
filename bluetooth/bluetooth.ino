@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(9, 10);
+SoftwareSerial mySerial(A0, A1);
 void setup() {
 
   pinMode(13, OUTPUT);
@@ -17,7 +17,7 @@ void loop() {
   
     char c = mySerial.read();
     Serial.println(c);
-    
+   
     if(c =='1') {
       digitalWrite(13, HIGH);
     }
