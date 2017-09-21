@@ -1,12 +1,15 @@
+#include <SoftwareSerial.h>
+#include <Servo.h>
+
 #include <fuzzy_table.h>
 #include <PID_Beta6.h>
-
-#include <SoftwareSerial.h>
 
 #include <Omni3WD.h>
 
 //#include <SONAR.h>
 #include <EEPROM.h>
+
+
 
 // Motors
 
@@ -20,6 +23,8 @@ irqISR(irq3,isr3);
 MotorWheel wheel3(3,2,4,5,&irq3);        // Pin3:PWM, Pin2:DIR, Pin4:PhaseA, Pin5:PhaseB
 
 Omni3WD Omni(&wheel1,&wheel2,&wheel3);
+
+Servo PinchServo;
 
 
 int pulse1 = 0;
@@ -86,13 +91,35 @@ void translateRight(){
   Omni.setCarRight(200);
 }
 
-void stop(){
-  Omni.setCarSlow2Stop(100);
-  //Omni.delayMS(100);
+void stopR(){
+  Omni.setCarSlow2Stop();
+  Omni.delayMS(100);
+}
+
+void ouverturePince(){
+  // ouverture de la pince
+  // pour modifier la vitesse, il faut modifier le delay
+  /*for(posPinchServo = 180; posPinchServo > 59; posPinchServo -=1)
+  {
+    PinchServo.write(posPinchServo);
+    delay(8);
+  }*/
+  PinchServo.write(60);
+}
+
+void fermeturePince(){
+  // fermeture de la pince
+  // pour modifier la vitesse, il faut modifier le delay
+  /*for(posPinchServo = 60; posPinchServo <= 180; posPinchServo +=1)
+  {
+    PinchServo.write(posPinchServo);
+    delay(8);
+  }*/
+  PinchServo.write(180);
 }
 
 
-SoftwareSerial mySerial(A0, A1);
+SoftwareSerial mySerial(A4, A5);
 
 void setup() {
   TCCR1B=TCCR1B&0xf8|0x01;    // Pin9,Pin10 PWM 31250Hz
@@ -102,11 +129,12 @@ void setup() {
 
   //
   Omni.PIDEnable(0.46,0.2,0,10);
+  PinchServo.attach(13);
 
   Serial.begin(19200);
+  stopR();
   /*wheel3.runPWM(50, HIGH);
   wheel2.runPWM(50, LOW);*/
-  stop();
 }
 
 void loop() {
@@ -133,16 +161,22 @@ void loop() {
       case 'a':
         translateLeft();
         break;
+      case 'e':
+        translateRight();
+        break;
+      case 'o':
+        translateRight();
+        break;
       case 'c':
         translateRight();
         break;
       case 's':
-        stop();
+        stopR();
         break;
     }
   }
   else{
-    stop();
+    //stopR();
   }
   
   Omni.delayMS(100);
